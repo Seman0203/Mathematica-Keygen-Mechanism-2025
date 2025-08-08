@@ -61,10 +61,18 @@ function random_function(seed) {
   return random;
 }
 
-const today = new Date();
-if (random_function(today.toDateString()) % 2 == 0) {
-  document.body.style.backgroundColor = 'azure';
-}
+(()=>{
+  const today = new Date();
+  if (random_function(today.toDateString()) % 2 == 0) {
+    document.body.style.backgroundColor = 'azure';
+  }
+  const d = new Date(today.getTime() + 86400*1000*365*2); // 2 years
+  const expireDate =d.getFullYear()*1e4+(d.getMonth()+1)*1e2+d.getDate();
+  document.getElementById("math-date").setAttribute("default",expireDate);
+  document.getElementById("math-date").innerText = expireDate;
+
+  document.getElementById("gt14").children[0].innerText="14.3.0";
+})();
 
 function copy(id) {
   const text = document.getElementById(id).innerText;
@@ -317,4 +325,5 @@ Initial Hash:\t`;
     }
   }
   document.getElementById('result').innerText = initial_hashs;
+
 }
