@@ -31,7 +31,6 @@ jobs:
           rm -rf ./release
           mkdir -p ./release
 
-          # 把想发布的文件复制到 release（存在则复制，不存在则跳过）
           for f in renotify.js main@v14.1.0.js index.* Mathematica14.png favicon.ico; do
             if [ -e "$f" ]; then
               cp -r "$f" ./release/
@@ -40,14 +39,14 @@ jobs:
             fi
           done
 
-          # 可选：显示 release 内容用于调试
           ls -la ./release
 
       - name: Upload artifact for Pages
-        uses: actions/upload-pages-artifact@v1
+        # 使用 upload-pages-artifact 的 v4（支持内部使用 v4 artifact）
+        uses: actions/upload-pages-artifact@v4
         with:
           path: './release'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
