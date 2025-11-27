@@ -2,46 +2,52 @@ name: Deploy HTML files to GitHub Pages
 
 on:
   push:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
-
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Move HTML files to release directory
-        run: |
-          mkdir ./release
-          
-          mv ./renotify.js ./release
-          mv ./main@v14.1.0.js ./release
-          mv ./index.* ./release
-          mv ./Mathematica14.png ./release
-          mv ./favicon.ico ./release
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@main
+      - name: Prepare release directory
+        run: |
+          set -e
+          rm -rf ./release
+          mkdir -p ./release
+
+          # 把想发布的文件复制到 release（存在则复制，不存在则跳过）
+          for f in renotify.js main@v14.1.0.js index.* Mathematica14.png favicon.ico; do
+            if [ -e "$f" ]; then
+              cp -r "$f" ./release/
+            else
+              echo "注意：未找到 $f，已跳过"
+            fi
+          done
+
+          # 可选：显示 release 内容用于调试
+          ls -la ./release
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v1
         with:
           path: './release'
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@main
+        uses: actions/deploy-pages@v1
